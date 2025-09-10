@@ -258,7 +258,9 @@ st.markdown("""
         border-radius: 8px !important;
         box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2) !important;
     }
-    
+    .st-emotion-cache-15cv43h.e1d2qte94 {
+        display: none;
+    }
     .stWarning {
         background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05)) !important;
         border: 2px solid var(--warning-orange) !important;
@@ -362,7 +364,7 @@ st.markdown("""
 <div class="intro-text">
     This is a lightweight, proof-of-concept version of a Retrieval-Augmented Generation (RAG) pipeline, designed to be computationally efficient for public deployment.
     To demonstrate the full scope of the architecture and our technical capabilities, the core project (unavailable for public demo due to the GPU-heavy requirements of PyTorch) utilizes advanced components, including a <b>TinyBERT cross-encoder</b> for more effective retrieval and a <b>HyDE-based query generator</b> for refined reranking.
-    For a detailed look at the complete, optimized codebase, please refer to the <a href="https://github.com/monis-codes/rxHackathon" style="color: var(--accent-blue);">this</a> repository.
+    For a detailed look at the complete, optimized codebase, please refer to the <a href="https://github.com/monis-codes/InsightEngine" style="color: var(--accent-blue);">this</a> repository.
 </div>
 """, unsafe_allow_html=True)
 
@@ -482,6 +484,8 @@ index = _get_pinecone_index()
 
 
 # Enhanced sidebar controls
+# --- Side bar controls ---
+# --- Side bar controls ---
 with st.sidebar:
     st.markdown("""
     <div class="sidebar-section">
@@ -491,28 +495,43 @@ with st.sidebar:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    uploaded_file = st.file_uploader("📄 Upload a PDF Document", type=["pdf"], help="Drag and drop your PDF file here or click to browse") 
+
+    MAX_FILE_SIZE_MB = 30  # New constant to define max size in MB
+
+    uploaded_file = st.file_uploader(
+        "📄 Upload a PDF Document", 
+        type=["pdf"], 
+        help=f"Drag and drop your PDF file here or click to browse (Max {MAX_FILE_SIZE_MB}MB)"
+    )
+    st.caption(f"Limit {MAX_FILE_SIZE_MB}MB per file • PDF")
     process_clicked = st.button("🚀 Process Document", type="primary")
-    
-    st.info("📄 Only PDF files are supported. Maximum file size: 200MB")
-    
+
+    st.info(f"📄 Only PDF files are supported. Maximum file size: {MAX_FILE_SIZE_MB}MB")
+
     st.markdown("---")
-    
+
     _show_captcha_sidebar()
 
+# --- Main content ---
+# ... (rest of the code is unchanged)
 
 # Enhanced processing flow with better feedback
 if process_clicked:
     if not uploaded_file:
         st.warning("📄 Please upload a document first.")
     else:
+        # Check file size
+        if len(uploaded_file.getvalue()) > MAX_FILE_SIZE_MB * 1024 * 1024:
+            st.error(f"❌ File size exceeds the {MAX_FILE_SIZE_MB}MB limit. Please upload a smaller file.")
+            st.stop()
+        
         if not _captcha_is_valid():
             st.warning("🔒 Action blocked. Please verify the CAPTCHA in the sidebar.")
             st.stop()
+        
         file_bytes = uploaded_file.getvalue()
         doc_id = hashlib.md5(file_bytes).hexdigest()
-        
+
         # Enhanced loading with custom styling
         with st.spinner("🔄 Processing document and preparing knowledge base..."):
             try:
@@ -520,7 +539,7 @@ if process_clicked:
             except Exception as e:
                 st.error(f"❌ Processing failed: {e}")
                 ok = False
-        
+
         if ok:
             st.session_state.doc_id = doc_id
             st.success("✅ Document processed and indexed successfully!")
