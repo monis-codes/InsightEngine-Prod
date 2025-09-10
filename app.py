@@ -33,23 +33,23 @@ st.markdown("""
         --background-card: rgba(255, 255, 255, 0.05);
     }
     
-    /* Enhanced main title styling */
+    /* Enhanced main title styling - Left aligned */
     .main-title {
         font-size: 3.5rem !important;
         font-weight: 800 !important;
         color: var(--text-white) !important;
         margin-bottom: 0.5rem !important;
-        text-align: center !important;
+        text-align: left !important;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     
     .title-container {
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 1rem;
         margin-bottom: 1.5rem;
         animation: fadeInDown 1s ease-out;
+        justify-content: flex-start;
     }
     
     .lightbulb-icon {
@@ -59,16 +59,28 @@ st.markdown("""
         animation: pulse 2s infinite;
     }
     
-    /* Enhanced introduction text styling */
+    /* Enhanced introduction text styling - Left aligned */
     .intro-text {
         color: var(--text-body-grey) !important;
         font-size: 1.2rem !important;
-        text-align: center !important;
+        text-align: left !important;
         margin-bottom: 2rem !important;
         line-height: 1.7 !important;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
+        max-width: 100%;
+    }
+    
+    /* Welcome container styling */
+    .welcome-container {
+        background-color: var(--background-card) !important;
+        border: 2px solid var(--accent-blue-border) !important;
+        border-radius: 12px !important;
+        padding: 2rem !important;
+        margin-bottom: 3rem !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .welcome-header {
+        margin-bottom: 1.5rem !important;
     }
     
     .cta-text {
@@ -147,25 +159,24 @@ st.markdown("""
         box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3) !important;
     }
     
-    /* Enhanced chat input styling */
+    /* Enhanced chat input styling - Left aligned */
     .chat-input-container {
-        background-color: var(--background-card) !important;
-        border: 2px solid var(--accent-blue-border) !important;
+        background-color: rgba(0, 123, 255, 0.08) !important;
+        border: 2px solid var(--accent-blue) !important;
         border-radius: 12px !important;
-        padding: 1.5rem !important;
+        padding: 2rem !important;
         margin: 2rem 0 !important;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
     }
     
     .chat-header {
         color: var(--text-white) !important;
         font-size: 1.8rem !important;
         font-weight: 700 !important;
-        text-align: center !important;
+        text-align: left !important;
         margin-bottom: 1.5rem !important;
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 0.8rem;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
@@ -338,7 +349,7 @@ st.markdown("""
 
 st.set_page_config(page_title="InsightEngine", layout="wide")
 
-# Enhanced main title with lightbulb emoji
+# Title section
 st.markdown("""
 <div class="title-container">
     <span class="lightbulb-icon">💡</span>
@@ -346,22 +357,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Enhanced introduction text
+# Introduction text
 st.markdown("""
 <div class="intro-text">
-    This is my demo for RAG pipeline project. This is the light v1 version. 
-    For a more optimized and accurate version, refer to this repo 
-    <a href="https://github.com/monis-codes/rxHackathon" style="color: var(--accent-blue);">rxHackathon</a>. 
-    Thank you for coming here. This is open source and everyone is welcome to 
-    contribute in this repo 
-    <a href="https://github.com/monis-codes/rag-Deploy" style="color: var(--accent-blue);">rag-Deploy</a>.
-</div>
-""", unsafe_allow_html=True)
-
-# Call to action
-st.markdown("""
-<div class="cta-text">
-    Upload a document to start extracting insights!
+    This is a lightweight, proof-of-concept version of a Retrieval-Augmented Generation (RAG) pipeline, designed to be computationally efficient for public deployment.
+    To demonstrate the full scope of the architecture and our technical capabilities, the core project (unavailable for public demo due to the GPU-heavy requirements of PyTorch) utilizes advanced components, including a <b>TinyBERT cross-encoder</b> for more effective retrieval and a <b>HyDE-based query generator</b> for refined reranking.
+    For a detailed look at the complete, optimized codebase, please refer to the <a href="https://github.com/monis-codes/rxHackathon" style="color: var(--accent-blue);">this</a> repository.
 </div>
 """, unsafe_allow_html=True)
 
@@ -386,8 +387,8 @@ MAX_PROMPT_CHARS = 500
 
 
 def _generate_captcha():
-    a = randbelow(9) + 1
-    b = randbelow(9) + 1
+    a = randbelow(20) + 1
+    b = randbelow(20) + 1
     st.session_state.captcha["a"] = a
     st.session_state.captcha["b"] = b
     st.session_state.captcha["verified_at"] = None
@@ -501,37 +502,39 @@ with st.sidebar:
     _show_captcha_sidebar()
 
 
-# Processing flow
+# Enhanced processing flow with better feedback
 if process_clicked:
     if not uploaded_file:
-        st.warning("Please upload a document first.")
+        st.warning("📄 Please upload a document first.")
     else:
         if not _captcha_is_valid():
-            st.warning("Action blocked. Please verify the CAPTCHA in the sidebar.")
+            st.warning("🔒 Action blocked. Please verify the CAPTCHA in the sidebar.")
             st.stop()
         file_bytes = uploaded_file.getvalue()
         doc_id = hashlib.md5(file_bytes).hexdigest()
-        with st.spinner("Processing document..."):
+        
+        # Enhanced loading with custom styling
+        with st.spinner("🔄 Processing document and preparing knowledge base..."):
             try:
                 ok = process_document(index, file_bytes, doc_id)
             except Exception as e:
-                st.error(f"Processing failed: {e}")
+                st.error(f"❌ Processing failed: {e}")
                 ok = False
+        
         if ok:
             st.session_state.doc_id = doc_id
-            st.success("Document processed and indexed.")
+            st.success("✅ Document processed and indexed successfully!")
 
 
-# Enhanced chat interface
-st.markdown("""
-<div class="chat-input-container">
-    <div class="chat-header">
-        <span class="chat-icon">💬</span>
-        Ask Your Document
-        <span class="chat-icon">💬</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Enhanced chat interface with left alignment
+# st.markdown("""
+# <div class="chat-input-container">
+#     <div class="chat-header">
+#         <span class="chat-icon">💬</span>
+#         Ask Your Document
+#     </div>
+# </div>
+# """, unsafe_allow_html=True)
 
 # Chat history with enhanced styling
 if st.session_state.messages:
@@ -542,14 +545,14 @@ if st.session_state.messages:
 else:
     st.markdown("""
     <div class="output-container">
-        <div style="text-align: center; color: var(--text-body-grey); padding: 2rem;">
+        <div style="text-align: left; color: var(--text-body-grey); padding: 2rem;">
             <h3>🤖 Ready to Answer Your Questions!</h3>
             <p>Upload a document and start asking questions to get AI-powered insights.</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# Enhanced chat input
+# Enhanced chat input with better loading feedback
 prompt = st.chat_input(f"💭 Ask a question about your document (max {MAX_PROMPT_CHARS} chars)…")
 if prompt:
     if not st.session_state.doc_id:
@@ -567,6 +570,7 @@ if prompt:
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
+                # Enhanced loading with custom spinner
                 with st.spinner("🧠 Generating insights..."):
                     try:
                         answer = get_answer(index, prompt, st.session_state.doc_id)
@@ -574,6 +578,4 @@ if prompt:
                         answer = f"❌ Error: {e}"
                     st.markdown(answer)
             st.session_state.messages.append(("assistant", answer))
-
-
 
