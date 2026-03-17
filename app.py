@@ -3,12 +3,12 @@ import hashlib
 import time
 import re
 from secrets import randbelow
-
 import streamlit as st
 from dotenv import load_dotenv
 from pinecone import Pinecone
 
 from rag_logic import process_document, get_answer
+
 
 
 load_dotenv()
@@ -62,7 +62,7 @@ st.markdown("""
     /* Enhanced introduction text styling - Left aligned */
     .intro-text {
         color: var(--text-body-grey) !important;
-        font-size: 1.2rem !important;
+        font-size: 1.4rem !important;
         text-align: left !important;
         margin-bottom: 2rem !important;
         line-height: 1.7 !important;

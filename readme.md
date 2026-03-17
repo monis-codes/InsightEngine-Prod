@@ -6,7 +6,7 @@ A lightweight, production-ready Retrieval-Augmented Generation (RAG) system that
 
 In today's information-rich world, extracting meaningful insights from lengthy documents is a critical challenge. Insight Engine solves this by creating an intelligent layer over your documents, allowing you to ask natural language questions and receive precise, contextual answers.
 
-**Perfect for:**
+**Perfect for: **
 - Technical documentation analysis
 - Research paper exploration  
 - Legal document review

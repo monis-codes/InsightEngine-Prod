@@ -17,7 +17,7 @@ def _require_env(var_name: str) -> str:
 def _extract_text_from_pdf(content: bytes) -> str:
     reader = PdfReader(BytesIO(content))
     if len(reader.pages) == 0:
-        raise ValueError("PDF contains no pages")
+        raise ValueError("PDF contains zero pages")
     text_parts: List[str] = []
     for page in reader.pages:
         page_text = page.extract_text() or ""
