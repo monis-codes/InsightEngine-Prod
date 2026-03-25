@@ -1,5 +1,6 @@
 import os
 import hashlib
+import math
 from io import BytesIO
 from typing import Any, List
 
@@ -27,6 +28,29 @@ def _extract_text_from_pdf(content: bytes) -> str:
     if not text:
         raise ValueError("No extractable text found in the PDF")
     return text
+
+
+def _normalize_vector(vector: List[float]) -> List[float]:
+    # For reduced-dimensional embeddings, normalize for stable cosine behavior.
+    magnitude = math.sqrt(sum((v * v) for v in vector))
+    if magnitude == 0:
+        return vector
+    return [v / magnitude for v in vector]
+
+
+def _embedding_config() -> tuple[str, int]:
+    model = os.getenv("GOOGLE_EMBEDDING_MODEL", "models/gemini-embedding-001").strip()
+    if not model:
+        model = "models/gemini-embedding-001"
+    if not model.startswith("models/"):
+        model = f"models/{model}"
+
+    raw_dim = (os.getenv("GOOGLE_EMBEDDING_DIMENSION", "768") or "768").strip()
+    try:
+        dimension = int(raw_dim)
+    except ValueError:
+        dimension = 768
+    return model, dimension
 
 
 def _chunk_text(text: str, max_chunk_size: int = 1500, overlap: int = 200) -> List[str]:
@@ -74,22 +98,24 @@ def process_document(index: Any, document_content: bytes, namespace: str) -> boo
     if not chunks:
         raise ValueError("Failed to create any text chunks from the document")
 
-    embedding_model = "models/text-embedding-004"
+    embedding_model, embedding_dimension = _embedding_config()
     result = genai.embed_content(
         model=embedding_model,
         content=chunks,
         task_type="RETRIEVAL_DOCUMENT",
-        title="Document Chunks"
+        title="Document Chunks",
+        output_dimensionality=embedding_dimension
     )
     embeddings: List[List[float]] = result["embedding"] if isinstance(result, dict) else result.embedding
 
     vectors = []
     for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+        normalized_vector = _normalize_vector(vector)
         chunk_hash = hashlib.md5(chunk.encode()).hexdigest()[:8]
         vector_id = f"{namespace}-{chunk_hash}-{i}"
         vectors.append({
             "id": vector_id,
-            "values": vector,
+            "values": normalized_vector,
             "metadata": {
                 "text": chunk,
                 "chunk_index": i,
@@ -117,11 +143,14 @@ def get_answer(index: Any, question: str, namespace: str) -> str:
 
     genai.configure(api_key=_require_env("GOOGLE_API_KEY"))
 
+    embedding_model, embedding_dimension = _embedding_config()
     search_embedding = genai.embed_content(
-        model="models/text-embedding-004",
+        model=embedding_model,
         content=question,
-        task_type="RETRIEVAL_QUERY"
+        task_type="RETRIEVAL_QUERY",
+        output_dimensionality=embedding_dimension
     )["embedding"]
+    search_embedding = _normalize_vector(search_embedding)
 
     matches = index.query(
         namespace=namespace,

@@ -39,7 +39,7 @@ Our proprietary smart chunking algorithm goes beyond simple text splitting:
 - Semantic coherence validation
 
 **3. ⚡ High-Performance Vector Operations**
-- Google's state-of-the-art `text-embedding-004` model
+- Google's `gemini-embedding-001` model (configurable via `GOOGLE_EMBEDDING_MODEL`)
 - 768-dimensional embeddings for rich semantic representation
 - Pinecone vector database for millisecond retrieval speeds
 - Cosine similarity matching for precise relevance ranking
@@ -65,12 +65,6 @@ git clone https://github.com/monis-codes/rag-Deploy.git
 cd rag-Deploy
 
 # Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
 
 ### Configuration
 
@@ -78,6 +72,8 @@ Create a `.env` file in the project root:
 
 ```env
 GOOGLE_API_KEY=your_google_api_key_here
+GOOGLE_EMBEDDING_MODEL=models/gemini-embedding-001
+GOOGLE_EMBEDDING_DIMENSION=768
 PINECONE_API_KEY=your_pinecone_api_key_here
 PINECONE_ENVIRONMENT=your_pinecone_environment
 ```
@@ -106,7 +102,7 @@ Visit `http://localhost:8501` to access the interface.
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | **Frontend** | Streamlit | Interactive web interface |
-| **Embeddings** | Google text-embedding-004 | Semantic vector generation |
+| **Embeddings** | Google gemini-embedding-001 | Semantic vector generation |
 | **Vector DB** | Pinecone | High-speed similarity search |
 | **LLM** | Google Gemini 2.5 Flash | Response generation |
 | **Processing** | Custom algorithms | Smart text chunking |
