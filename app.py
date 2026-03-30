@@ -496,7 +496,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    MAX_FILE_SIZE_MB = 30  # New constant to define max size in MB
+    MAX_FILE_SIZE_MB = 200  # Maximum upload size in MB
 
     uploaded_file = st.file_uploader(
         "📄 Upload a PDF Document", 

@@ -151,7 +151,6 @@ def get_answer(index: Any, question: str, namespace: str) -> str:
         output_dimensionality=embedding_dimension
     )["embedding"]
     search_embedding = _normalize_vector(search_embedding)
-
     matches = index.query(
         namespace=namespace,
         vector=search_embedding,
